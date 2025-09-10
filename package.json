@@ -1,0 +1,20 @@
+{
+  "name": "intro2cedt-final-project-g30",
+  "version": "1.0.0",
+  "description": "final project for Intro to CEDT 2025 course",
+  "homepage": "https://github.com/naxocist/Intro2cedt-final-project-g30#readme",
+  "bugs": {
+    "url": "https://github.com/naxocist/Intro2cedt-final-project-g30/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naxocist/Intro2cedt-final-project-g30.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
