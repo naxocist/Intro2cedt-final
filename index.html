@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weeb Guess — MAL นักทายอนิเมะ</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="container">
+    <header>
+      <h1>MAL Weeb Guess</h1>
+      <p class="subtitle">ทายอนิเมะจากคำใบ้ 5 ข้อ — ยิ่งทายเร็ว ยิ่งได้คะแนนมาก!</p>
+    </header>
+
+    <section class="controls card">
+      <h2>ตั้งค่าเกม</h2>
+
+      <label>ใส่ชื่อผู้ใช้ MyAnimeList (MAL) ถ้ามี: <input id="mal-username" placeholder="เช่น example_user" /></label>
+
+      <div class="or">หรือ</div>
+
+      <label>ป้อนลิสต์อนิเมะที่ต้องการ (คั่นด้วยบรรทัดใหม่):</label>
+      <textarea id="user-list" rows="4" placeholder="ตัวอย่าง: Fullmetal Alchemist: Brotherhood"></textarea>
+
+      <details id="picker">
+        <summary>เลือกระบุการสุ่ม (ถ้าไม่ใส่ลิสต์)</summary>
+        <div class="row">
+          <label>ปีเริ่ม: <input id="year-from" type="number" min="1900" max="2099" value="2000" /></label>
+          <label>ปีจบ: <input id="year-to" type="number" min="1900" max="2099" value="2025" /></label>
+        </div>
+        <p>เลือกอย่างน้อย 4 แนว (genres)</p>
+        <div id="genres" class="genres-grid">
+          <!-- genre checkboxes inserted by JS -->
+        </div>
+      </details>
+
+      <div class="row">
+        <button id="start-btn" class="primary">เริ่มเกม</button>
+        <button id="reset-btn">รีเซ็ต</button>
+      </div>
+      <small class="note">
+        ต้องการ API keys: ตั้งค่า <code>MAL_CLIENT_ID</code> และ <code>TYPHOON_API_KEY</code> ใน <code>index.js</code>.
+        หากไม่มี keys แอพจะใช้ตัวอย่างภายในเครื่องแทน.
+      </small>
+    </section>
+
+    <section id="game-area" class="card hidden">
+      <div id="statusbar" class="row between">
+        <div>ชุดที่ <span id="current-index">1</span>/<span id="total-count">1</span></div>
+        <div>คะแนนตอนนี้: <span id="score">0</span></div>
+      </div>
+
+      <div id="hint-area" class="hints">
+        <!-- Hints will be rendered here -->
+      </div>
+
+      <div id="guess-area">
+        <input id="guess-input" placeholder="พิมพ์ชื่ออนิเมะที่คิดว่าใช่..." />
+        <button id="guess-btn">ทาย</button>
+        <button id="next-btn" class="secondary hidden">ข้ามไปเรื่องถัดไป</button>
+      </div>
+
+      <div id="progress-log" class="log"></div>
+    </section>
+
+    <section id="result-area" class="card hidden">
+      <h2>ผลลัพธ์ & Tier</h2>
+      <div id="result-summary"></div>
+      <div id="meme-area" class="meme"></div>
+      <button id="play-again" class="primary">เล่นอีกครั้ง</button>
+    </section>
+
+    <footer class="muted">
+      สร้างด้วย MyAnimeList API และ Typhoon free API — ปรับแต่งได้ตามต้องการ
+    </footer>
+  </div>
+
+  <script src="index.js" defer></script>
+</body>
+</html>
+
