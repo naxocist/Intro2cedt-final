@@ -12,7 +12,7 @@ mongoose.connect(process.env.MONGO_URL);
 
 
 import MALRoute from "./src/routes/MALRoute.js"
-import DBRoute from "./src/routes/DBRoute.js"
+import UserRoute from "./src/routes/UserRoute.js"
 
 import express from "express"
 const app = express();
@@ -23,7 +23,7 @@ app.use(express.json())
 app.use(express.static(path.join(__dirname, "../frontend/")));
 
 app.use("/api/mal", MALRoute);
-app.use("/api/db", DBRoute);
+app.use("/api/users", UserRoute);
 
 const PORT = 3221;
 app.listen(PORT, "0.0.0.0", () => {

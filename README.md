@@ -8,15 +8,6 @@ at the root directory run
 npm run start
 ```
 
-## Backend Endpoints
-- GET /api/mal
-    - get random clues by MAL username
-- GET /api/db
-    - get leaderboard user list
-- POST /api/db
-    - add user to the leaderboard
-
-
 ## Members
 - Waranthon Wanichnam
 - Ratanon Khamrong
