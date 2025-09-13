@@ -1,3 +1,6 @@
+fetch("localhost:3221/api", {
+})
+
 // index.js
 // Weeb Guess — main app logic
 // IMPORTANT: put your keys here if you have them.

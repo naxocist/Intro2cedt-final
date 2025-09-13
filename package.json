@@ -1,22 +1,10 @@
 {
-  "name": "intro2cedt-final",
-  "version": "1.0.0",
-  "description": "final project for Intro to CEDT 2025 course",
-  "homepage": "https://github.com/naxocist/Intro2cedt-final-project-g30#readme",
-  "bugs": {
-    "url": "https://github.com/naxocist/Intro2cedt-final-project-g30/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/naxocist/Intro2cedt-final-project-g30.git"
-  },
-  "license": "ISC",
-  "type": "module",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
-    "start": "node --watch server.js"
-  },
-  "dependencies": {
-    "express": "^5.1.0",
-    "dotenv": "^17.2.2"
+    "start": "npm --prefix backend start"
   }
 }
