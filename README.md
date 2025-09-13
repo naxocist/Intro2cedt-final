@@ -1,5 +1,22 @@
 # Intro2cedt Final project [ Group 30 ]
 
+
+In this project, Frontend and Backend code are packed in the same host and port (3221)
+## How to run?
+at the root directory run
+```
+npm run start
+```
+
+## Backend Endpoints
+- GET /api/mal
+    - get random clues by MAL username
+- GET /api/db
+    - get leaderboard user list
+- POST /api/db
+    - add user to the leaderboard
+
+
 ## Members
 - Waranthon Wanichnam
 - Ratanon Khamrong
@@ -7,5 +24,6 @@
 - Benyapha Sa-Ardmuang
 - Natthanicha Chaninsathapat
 - Thitipong Phuangphet
+
 
 
