@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   score: {
     type: Number,
     required: true,
-  },
+  }
 });
 
 const User = mongoose.model("User", userSchema);
