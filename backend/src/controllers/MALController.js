@@ -31,12 +31,9 @@ export const getRandomAnimeCluesByUsername = async (req, res) => {
       method: "GET",
       headers
     });
-
     const animeData = await animeResponse.json();
 
-    // Create clues (async because of AI summarization)
     const clues = await createCluesByData(animeData);
-
     res.status(200).json(clues);
 
   } catch (error) {
@@ -83,6 +80,11 @@ async function getSynopsisSummarization(data) {
   const prompt = `Summarize this anime synopsis for anime guessing without using specific names, be precise and informative. Synopsis: ${data?.synopsis}`;
 
   try {
+
+    if (process.env.USE_AI == "False") {
+      throw new Error("No AI!");
+    }
+
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -101,6 +103,7 @@ async function getSynopsisSummarization(data) {
 
   } catch (error) {
     console.log(error);
+
     // fallback to raw synopsis if AI fails
     return data?.synopsis?.slice(0, 200) + "...";
   }

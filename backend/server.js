@@ -6,15 +6,24 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+
+import mongoose from "mongoose";
+mongoose.connect(process.env.MONGO_URL);
+
+
 import MALRoute from "./src/routes/MALRoute.js"
+import DBRoute from "./src/routes/DBRoute.js"
 
 import express from "express"
 const app = express();
+
+app.use(express.json())
 
 // Serve frontend
 app.use(express.static(path.join(__dirname, "../frontend/")));
 
 app.use("/api/mal", MALRoute);
+app.use("/api/db", DBRoute);
 
 const PORT = 3221;
 app.listen(PORT, "0.0.0.0", () => {
