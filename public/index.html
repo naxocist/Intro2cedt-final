@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weeb Guess — MAL Anime Guess</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="container">
+    <header>
+      <h1>MAL Weeb Guess</h1>
+      <p class="subtitle">Guess the anime from your knowledge!</p>
+    </header>
+
+    <section class="controls card">
+      <h2>Setup</h2>
+
+      <label>Enter MyAnimeList (MAL) username if you have one: <input id="mal-username" placeholder="e.g. example_user" /></label>
+
+      <div class="or">or</div>
+
+      <label>Enter the list of animes(separated by new lines):</label>
+      <textarea id="user-list" rows="4" placeholder="Example: Fullmetal Alchemist: Brotherhood"></textarea>
+
+      <details id="picker">
+        <summary>Select randomization (if no list provided)</summary>
+        <div class="row">
+          <label>Year from: <input id="year-from" type="number" min="1900" max="2099" value="2000" /></label>
+          <label>Year to: <input id="year-to" type="number" min="1900" max="2099" value="2025" /></label>
+        </div>
+        <p>Select at least 4 genres</p>
+        <div id="genres" class="genres-grid">
+          <!-- genre checkboxes inserted by JS -->
+        </div>
+      </details>
+
+      <div class="row">
+        <button id="start-btn" class="primary">Start Game</button>
+        <button id="reset-btn">Reset</button>
+      </div>
+      <small class="note">
+        Requires API keys: set <code>MAL_CLIENT_ID</code> and <code>TYPHOON_API_KEY</code> in <code>index.js</code>.
+        If no keys are provided, the app will use local sample data instead.
+      </small>
+    </section>
+
+    <section id="game-area" class="card hidden">
+      <div id="statusbar" class="row between">
+        <div>Round <span id="current-index">1</span>/<span id="total-count">1</span></div>
+        <div>Current Score: <span id="score">0</span></div>
+      </div>
+
+      <div id="hint-area" class="hints">
+        <!-- Hints will be rendered here -->
+      </div>
+
+      <div id="guess-area">
+        <input id="guess-input" placeholder="Type the anime name you think it is..." />
+        <button id="guess-btn">Guess</button>
+        <button id="next-btn" class="secondary hidden">Skip to next</button>
+      </div>
+
+      <div id="progress-log" class="log"></div>
+    </section>
+
+    <section id="result-area" class="card hidden">
+      <h2>Results & Tier</h2>
+      <div id="result-summary"></div>
+      <div id="meme-area" class="meme"></div>
+      <button id="play-again" class="primary">Play Again</button>
+    </section>
+
+    <footer class="muted">
+      Built with MyAnimeList API and Typhoon free API — customizable as you wish
+    </footer>
+  </div>
+
+  <script src="index.js" defer></script>
+</body>
+</html>
+
