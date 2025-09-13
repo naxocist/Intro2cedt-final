@@ -10,7 +10,7 @@
   <div id="app" class="container">
     <header>
       <h1>MAL Weeb Guess</h1>
-      <p class="subtitle">Guess the anime from your knowledge!</p>
+      <p class="subtitle">the test that shows how weeb you are..</p>
     </header>
 
     <section class="controls card">
@@ -21,10 +21,10 @@
       <div class="or">or</div>
 
       <label>Enter the list of animes(separated by new lines):</label>
-      <textarea id="user-list" rows="4" placeholder="Example: Fullmetal Alchemist: Brotherhood"></textarea>
+      <textarea id="user-list" rows="4" placeholder="e.g. Fullmetal Alchemist: Brotherhood"></textarea>
 
       <details id="picker">
-        <summary>Select randomization (if no list provided)</summary>
+        <summary>customization</summary>
         <div class="row">
           <label>Year from: <input id="year-from" type="number" min="1900" max="2099" value="2000" /></label>
           <label>Year to: <input id="year-to" type="number" min="1900" max="2099" value="2025" /></label>
@@ -39,10 +39,6 @@
         <button id="start-btn" class="primary">Start Game</button>
         <button id="reset-btn">Reset</button>
       </div>
-      <small class="note">
-        Requires API keys: set <code>MAL_CLIENT_ID</code> and <code>TYPHOON_API_KEY</code> in <code>index.js</code>.
-        If no keys are provided, the app will use local sample data instead.
-      </small>
     </section>
 
     <section id="game-area" class="card hidden">
