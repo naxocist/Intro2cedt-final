@@ -24,7 +24,8 @@ export async function createCluesByData(data) {
     5: {
       main_picture: data?.main_picture,
       pictures: data?.pictures
-    }
+    },
+    answer: data.id
   };
 
   return clues;
