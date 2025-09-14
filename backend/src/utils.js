@@ -1,5 +1,5 @@
 export async function createCluesByData(data) {
-  const summary = await getSynopsisSummarization(data);
+  const summary = data.synopsis ? await getSynopsisSummarization(data) : "";
 
   const clues = {
     1: {
@@ -33,7 +33,7 @@ export async function createCluesByData(data) {
 
 
 export async function getSynopsisSummarization(data) {
-  const prompt = `Summarize this anime synopsis for anime guessing without using specific names, be precise and informative. Synopsis: ${data?.synopsis}`;
+  const prompt = createPrompt(data.synopsis || "");
 
   try {
 
@@ -65,4 +65,26 @@ export async function getSynopsisSummarization(data) {
   }
 }
 
+
+function createPrompt(synopsis) {
+  return `Rewrite the following anime synopsis into a clue-style version for a guessing game. 
+The clue must: Avoid all specific names of characters, places, or groups. 
+Be vague but informative, focusing on key themes, conflicts, and settings. 
+Stay precise and concise (2–4 sentences).
+Keep it engaging enough to help players guess, without making it too obvious.
+
+Example
+Full synopsis:
+"Centuries ago, mankind was slaughtered to near extinction by monstrous humanoid creatures called titans, forcing humans to hide in fear behind enormous concentric walls. What makes these giants truly terrifying is that their taste for human flesh is not born out of hunger but what appears to be out of pleasure. To ensure survival, the remnants of humanity began living within defensive barriers, resulting in one hundred years without a single titan encounter. However, that fragile calm is soon shattered when a colossal titan manages to breach the supposedly impregnable outer wall, reigniting the fight for survival against the man-eating abominations."
+Clue-style synopsis:
+"Humanity hides behind great barriers after giant man-eating beings nearly wiped them out. After a century of peace, one massive creature shatters the defenses, forcing a desperate battle for survival."
+
+Now your turn:
+Full synopsis:
+${synopsis}
+Clue-style synopsis:
+
+*Also attach thai translation of that clue-style synopsis at the end of your response separated only by the symbol '|'.
+`
+}
 
