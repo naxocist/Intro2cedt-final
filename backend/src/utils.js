@@ -38,27 +38,34 @@ export async function getSynopsisSummarization(data) {
   try {
 
     if (process.env.USE_AI == "False") {
-      throw new Error("No AI!");
+      throw new Error("No AI! (remove USE_AI env var to enable)");
     }
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const typhoon = true;
+
+    const base_url = typhoon ? "https://api.opentyphoon.ai/v1/chat/completions" : "https://api.groq.com/openai/v1/chat/completions";
+    const api_key = typhoon ? process.env.TYPHOON_API_KEY : process.env.GROQ_API_KEY;
+    const model = typhoon ? "typhoon-v2.1-12b-instruct" : "openai/gpt-oss-120b";
+
+    const response = await fetch(base_url, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        "Authorization": `Bearer ${api_key}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-120b",
+        model: model,
         messages: [{ role: "user", content: prompt }]
       })
     });
 
     const json = await response.json();
+    console.log(json)
     const summary = json.choices[0].message.content;
     return summary;
 
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
 
     // fallback to raw synopsis if AI fails
     return data?.synopsis?.slice(0, 200) + "...";
@@ -69,22 +76,17 @@ export async function getSynopsisSummarization(data) {
 function createPrompt(synopsis) {
   return `Rewrite the following anime synopsis into a clue-style version for a guessing game. 
 The clue must: Avoid all specific names of characters, places, or groups. 
-Be vague but informative, focusing on key themes, conflicts, and settings. 
+Be informative, focusing on key themes, conflicts, and settings. 
 Stay precise and concise (2–4 sentences).
 Keep it engaging enough to help players guess, without making it too obvious.
-
-Example
-Full synopsis:
-"Centuries ago, mankind was slaughtered to near extinction by monstrous humanoid creatures called titans, forcing humans to hide in fear behind enormous concentric walls. What makes these giants truly terrifying is that their taste for human flesh is not born out of hunger but what appears to be out of pleasure. To ensure survival, the remnants of humanity began living within defensive barriers, resulting in one hundred years without a single titan encounter. However, that fragile calm is soon shattered when a colossal titan manages to breach the supposedly impregnable outer wall, reigniting the fight for survival against the man-eating abominations."
-Clue-style synopsis:
-"Humanity hides behind great barriers after giant man-eating beings nearly wiped them out. After a century of peace, one massive creature shatters the defenses, forcing a desperate battle for survival."
 
 Now your turn:
 Full synopsis:
 ${synopsis}
 Clue-style synopsis:
 
-*Also attach thai translation of that clue-style synopsis at the end of your response separated only by the symbol '|'.
+*Also attach thai translation of that clue-style synopsis at the end of your response separated only by the symbol '|', so the format becomes <clue-style synopsis> | <thai translation>
+*Do not include any escape characters like \n or \ in your response (put everything in a single line)
 `
 }
 
