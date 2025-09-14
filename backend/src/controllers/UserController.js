@@ -11,7 +11,6 @@ export const addUser = async (req, res) => {
     const newUser = new User(req.body);
 
     const existingUser = await User.find({ name: newUser.name });
-    console.log(existingUser)
     if (existingUser.length > 0) {
       return res.status(409).json({ error: "User with this name already exists" });
     }

@@ -60,12 +60,10 @@ export async function getSynopsisSummarization(data) {
     });
 
     const json = await response.json();
-    console.log(json)
     const summary = json.choices[0].message.content;
     return summary;
 
   } catch (error) {
-    console.log(error.message);
 
     // fallback to raw synopsis if AI fails
     return data?.synopsis?.slice(0, 200) + "...";
