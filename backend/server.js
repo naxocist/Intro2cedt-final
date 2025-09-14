@@ -17,6 +17,7 @@ import UserRoute from "./src/routes/UserRoute.js"
 import express from "express"
 const app = express();
 
+
 app.use(express.json())
 
 // Serve frontend

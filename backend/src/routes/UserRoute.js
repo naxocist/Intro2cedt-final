@@ -8,11 +8,13 @@ const router = express.Router();
 router.get("/", UserController.getLeaderboard);
 
 // POST /api/users -- add user to the leaderboard
-router.post("/", UserController.addUserToLeaderboard);
+router.post("/", UserController.addUser);
 
-// PUT /api/users -- update user data who is on leaderboard
-// router.post("/", UserController.addUserToLeaderboard);
+// PUT /api/users -- update user score on the leaderboard
+router.put("/", UserController.updateUserScore);
 
+// DELETE /api/users -- delete user from the leaderboard
+router.delete("/", UserController.deleteUser);
 
 export default router
 

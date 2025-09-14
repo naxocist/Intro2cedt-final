@@ -10,7 +10,7 @@ export const getRandomAnimeCluesByUsername = async (req, res) => {
       "Content-Type": "application/json"
     };
 
-    // Fetch user's anime list
+    // Fetch user's anime list by specified MAL account
     const listResponse = await fetch(`${MAL_API_BASE}/users/${username}/animelist?limit=1000&nsfw=true`, {
       method: "GET",
       headers
