@@ -44,7 +44,7 @@ function showToast(message) {
 }
 
 async function fetchJSON(url, opts = {}) {
-  const res = await fetch(url, { ...opts, headers: { 'Content-Type': 'application/json', ...(opts.headers||{}) } });
+  const res = await fetch(url, { ...opts, headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) } });
   if (!res.ok) throw new Error(`${res.status}`);
   return await res.json().catch(() => ({}));
 }
@@ -105,9 +105,9 @@ async function registerUser() {
   const name = els.name.value.trim();
   const mal = els.mal.value.trim();
   const password = els.password.value;
-  if (!name || !password) { 
-    showToast('Please fill name and password'); 
-    return; 
+  if (!name || !password) {
+    showToast('Please fill name and password');
+    return;
   }
 
 
@@ -115,9 +115,9 @@ async function registerUser() {
     // Login flow: try create; if already exists, just set active user
     const createBody = { name, password, mal };
     const res = await fetch(API.users, {
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify(createBody) 
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(createBody)
     });
     const resJson = await res.json();
     const resUser = resJson.user;
@@ -128,7 +128,7 @@ async function registerUser() {
       showToast('Logged in');
     } else if (res.status === 200) {
       // user already exists; 
-      if(password !== resUser.password) {
+      if (password !== resUser.password) {
         showToast('Wrong password');
         return;
       }
@@ -148,18 +148,18 @@ async function registerUser() {
 async function deleteUser() {
 
   if (!currentUser) {
-    showToast('Please login first!'); 
+    showToast('Please login first!');
     return;
   }
 
 
   try {
-    const res = await fetch(API.users, { 
-      method: 'DELETE', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify({ name: currentUser.name, password: currentUser.password }) 
+    const res = await fetch(API.users, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: currentUser.name, password: currentUser.password })
     });
-    
+
     if (res.ok) {
       showToast('Deleted');
       currentUser = null;
@@ -209,9 +209,9 @@ function clearCluesPanel() {
 }
 
 async function startGame() {
-  if(!currentUser) {
+  if (!currentUser) {
     showToast('Please login first!');
-    return ;
+    return;
   }
 
   resetGameUI();
@@ -313,22 +313,22 @@ function endRound(win) {
     }
   }
 
-  submitScoreIfHigher();
+  submitScore();
 }
 
-async function submitScoreIfHigher() {
-  if (!currentUser || roundScore <= 0) return;
+async function submitScore() {
+  if (!currentUser) return;
 
-  
+
   try {
-    const body = { name: currentUser.name, password: currentUser.password, score: roundScore };
+    const body = { name: currentUser.name, password: currentUser.password, score: roundScore + currentUser.score };
     const res = await fetch(API.users, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     })
-    
-    if(res.ok) {
+
+    if (res.ok) {
       els.bestScore.textContent = String(Math.max(parseInt(els.bestScore.textContent || '0', 10), roundScore));
       updateActiveUser();
       await loadLeaderboard();
@@ -338,13 +338,17 @@ async function submitScoreIfHigher() {
 
 function handleSubmitAnswer() {
   if (!currentClues) { showToast('Start a round first'); return; }
+
   const input = parseInt(els.answer.value, 10);
   if (!input) { showToast('Enter a MAL anime ID'); return; }
+
   const answerId = currentClues.answer;
+
   if (revealed === 5) {
     if (finalGuessUsed) { showToast('Round ended. Press Start to play again.'); return; }
     finalGuessUsed = true;
   }
+
   if (Number(input) === Number(answerId)) {
     endRound(true);
   } else {
