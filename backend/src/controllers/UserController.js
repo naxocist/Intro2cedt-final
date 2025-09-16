@@ -1,7 +1,7 @@
 import User from "../models/userModel.js"
 
 export const getUsers = async (req, res) => {
-  const users = await User.find().sort({ score: -1, name: 1 }).select({ name: 1, score: 1 }).limit(10);
+  const users = await User.find().sort({ score: -1, name: 1 }).select({ name: 1, score: 1 });
   return res.status(200).json(users);
 }
 
@@ -11,7 +11,7 @@ export const addUser = async (req, res) => {
     let user = await User.findOne({ name });
 
     if (user) {
-      return res.status(200).json({ message: "User already exists", user });
+      return res.status(400).json({ message: "User already exists", user });
     }
 
     const newUser = new User({

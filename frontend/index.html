@@ -1,40 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <title>Have you touched grass today?</title>
-  <link rel="stylesheet" href="./styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anime Guessor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-  <div class="container">
-    <h2>Anime Guessing Game</h2>
-    <div id="loginForm">
-      <input type="text" id="name" placeholder="Enter your name" required>
-      <input type="text" id="mal" placeholder="MAL Username (optional)">
-      <input type="password" id="password" placeholder="Password" required>
-      <button onclick="login()">Start Game</button>
-      <button onclick="deleteUser()" style="background:#e74c3c; margin-top:10px;">Delete User</button>
-    </div>
-
-    <div id="gameArea" style="display:none;">
-      <div class="hint-box" id="hintBox">
-        <p>Loading hint...</p>
+  <div id="app">
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo">🌲</div>
+        <h1>Have you touched grass today?</h1>
       </div>
-      <input type="text" id="guess" placeholder="enter the anime MyAnimeList id here">
-      <button onclick="submitGuess()">Guess</button>
-      <button onclick="skip()">Skip</button>
-    </div>
+      <div class="scoreboard">
+        <div class="score-label">Your Best Score</div>
+        <div id="bestScore" class="score-value">0</div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel user-panel glass">
+        <h2>Your Profile</h2>
+        <div id="activeUserProfile" class="active-user-profile hidden">
+          <span class="name"></span>
+          <span class="score"></span>
+        </div>
+        <form id="userForm" autocomplete="off">
+          <div class="field">
+            <label for="name">Leaderboard Name (required)</label>
+            <input id="name" type="text" placeholder="e.g., AnimeInwza007" required>
+          </div>
+          
+          <div class="field">
+            <label for="password">Password (required)</label>
+            <input id="password" type="password" placeholder="Keep your score safe" required>
+          </div>
+
+          <div class="field">
+            <label for="mal">MyAnimeList Username (optional)</label>
+            <input id="mal" type="text" placeholder="Defaults to Naxocist">
+          </div>
+
+          <div class="actions">
+            <button id="registerBtn" type="button" class="btn">Login</button>
+            <button id="deleteBtn" type="button" class="btn outline">Delete</button>
+          </div>
+        </form>
+        <div class="hint">Tip: Register once, then start playing. Scores only update if higher.</div>
+      </section>
+
+      <section class="panel game-panel glass">
+        <div class="game-header">
+          <h2>Guess the Anime</h2>
+          <button id="startBtn" class="btn primary">Start</button>
+        </div>
+
+        <div id="skeleton" class="skeleton hidden">
+          <div class="sk-grid">
+            <div class="sk-card"></div>
+            <div class="sk-card"></div>
+            <div class="sk-card"></div>
+            <div class="sk-card"></div>
+            <div class="sk-card sk-image"></div>
+          </div>
+          <div class="sk-answer">
+            <div class="sk-input"></div>
+            <div class="sk-btn"></div>
+            <div class="sk-btn"></div>
+          </div>
+        </div>
+
+        <div id="gameArea" class="game-area hidden">
+          <div class="clues-grid">
+            <div class="clue" data-clue="1">
+              <div class="clue-title">Clue 1</div>
+              <div class="clue-content" id="clue1"></div>
+            </div>
+            <div class="clue" data-clue="2">
+              <div class="clue-title">Clue 2</div>
+              <div class="clue-content" id="clue2"></div>
+            </div>
+            <div class="clue" data-clue="3">
+              <div class="clue-title">Clue 3</div>
+              <div class="clue-content" id="clue3"></div>
+            </div>
+            <div class="clue" data-clue="4">
+              <div class="clue-title">Clue 4</div>
+              <div class="clue-content" id="clue4"></div>
+            </div>
+            <div class="clue" data-clue="5">
+              <div class="clue-title">Clue 5</div>
+              <div class="clue-content image-clue" id="clue5"></div>
+            </div>
+          </div>
+
+          <div class="answer-row">
+            <input id="answer" type="number" placeholder="Enter MAL Anime ID (e.g., 5114)">
+            <button id="submitBtn" class="btn primary">Submit</button>
+            <button id="skipBtn" class="btn outline">Skip</button>
+          </div>
+
+          <div class="round-status">
+            <div>Clue <span id="clueIndex">1</span>/5</div>
+            <div>Round Score: <span id="roundScore">0</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel leaderboard-panel glass">
+        <h2>Leaderboard</h2>
+        <ol id="leaderboard" class="leaderboard"></ol>
+        <button id="refreshLb" class="btn small">Refresh</button>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <a href="https://myanimelist.net/" target="_blank" rel="noopener">Powered by MyAnimeList</a>
+    </footer>
   </div>
 
-  <div class="leaderboard">
-    <h2>Leaderboard</h2>
-    <ul id="leaderboardList"></ul>
-    <p id="myRank"></p>
-  </div>
+  <div id="toast" class="toast"></div>
 
-  <script type="module" src="./script.js"></script>
+  <script type="module" src="app.js" defer></script>
 </body>
-
 </html>
+
+
