@@ -50,7 +50,6 @@ export const updateUserScore = async (req, res) => {
     }
 
     if (score > user.score) {
-      console.log(`Updating score for ${name}: ${user.score} -> ${score}`);
       user.score = score;
       await user.save();
     }
