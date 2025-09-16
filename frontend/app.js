@@ -81,14 +81,13 @@ async function loadLeaderboard() {
       }
     });
 
-    // Update profile active user summary
-    if (currentUser) updateActiveProfile(users);
+    updateActiveUser(users);
   } catch (e) {
     // silent
   }
 }
 
-function updateActiveProfile(users) {
+function updateActiveUser(users) {
   const container = els.activeUserProfile;
   if (!currentUser) { container.classList.add('hidden'); return; }
 
@@ -115,31 +114,32 @@ async function registerUser() {
   try {
     // Login flow: try create; if already exists, just set active user
     const createBody = { name, password, mal };
-    const res = await fetch(API.users, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(createBody) });
+    const res = await fetch(API.users, {
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify(createBody) 
+    });
     const resJson = await res.json();
+    const resUser = resJson.user;
 
     if (res.status === 201) {
-      currentUser = { name, mal: mal || 'Naxocist', password };
-      els.bestScore.textContent = '0';
-      updateActiveProfile();
+      // user was created
+      currentUser = resUser;
       showToast('Logged in');
-    } else if (res.status === 400) {
+    } else if (res.status === 200) {
       // user already exists; 
-
-      if(password !== resJson.user.password) {
+      if(password !== resUser.password) {
         showToast('Wrong password');
         return;
       }
-      currentUser = { name, mal: mal || 'Naxocist', password };
-      // fetch leaderboard to update best score for this user if present
-      await loadLeaderboard();
-      // If not in top, set bestScore to 0 initially (we don't have an endpoint to fetch single user)
-      if (!els.bestScore.textContent) els.bestScore.textContent = '0';
-      updateActiveProfile();
+      currentUser = resUser
       showToast('Welcome back');
     } else {
       showToast('Login failed');
     }
+
+    await loadLeaderboard();
+    updateActiveUser();
   } catch (e) {
     showToast('Network error');
   }
@@ -147,20 +147,25 @@ async function registerUser() {
 
 async function deleteUser() {
 
-  if (!currentUser && (!els.name.value || !els.password.value)) {
-    showToast('Enter name and password'); 
+  if (!currentUser) {
+    showToast('Please login first!'); 
     return;
   }
 
-  const name = (currentUser?.name) || els.name.value.trim();
-  const password = (currentUser?.password) || els.password.value;
+
   try {
-    const res = await fetch(API.users, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, password }) });
+    const res = await fetch(API.users, { 
+      method: 'DELETE', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify({ name: currentUser.name, password: currentUser.password }) 
+    });
+    
     if (res.ok) {
       showToast('Deleted');
       currentUser = null;
       els.bestScore.textContent = '0';
-      els.activeUser.classList.remove('show');
+      els.activeUserProfile.classList.remove('show');
+      updateActiveUser()
       await loadLeaderboard();
     } else if (res.status === 403) {
       showToast('Wrong password');
@@ -217,7 +222,7 @@ async function startGame() {
   els.gameArea.classList.add('hidden');
   els.skeleton.classList.remove('hidden');
 
-  // els.startBtn.disabled = true;
+  els.startBtn.disabled = true;
   showToast('Fetching clues...');
   try {
     const malUser = currentUser.mal && currentUser.mal.trim() ? currentUser.mal : 'Naxocist';
@@ -230,7 +235,7 @@ async function startGame() {
     showToast('Failed to load clues');
     els.skeleton.classList.add('hidden');
   } finally {
-    // els.startBtn.disabled = false;
+    els.startBtn.disabled = false;
   }
 }
 
@@ -313,21 +318,19 @@ function endRound(win) {
 
 async function submitScoreIfHigher() {
   if (!currentUser || roundScore <= 0) return;
+
   
   try {
-    // Try to update; if user doesn't exist, create then update
     const body = { name: currentUser.name, password: currentUser.password, score: roundScore };
-    let res = await fetch(API.users, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    if (res.status === 404) {
-      // create user first
-      const createBody = { name: currentUser.name, password: currentUser.password, mal: currentUser.mal || 'Naxocist' };
-      await fetch(API.users, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(createBody) });
-      // then update score
-      res = await fetch(API.users, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    }
-    if (res.ok) {
+    const res = await fetch(API.users, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+    
+    if(res.ok) {
       els.bestScore.textContent = String(Math.max(parseInt(els.bestScore.textContent || '0', 10), roundScore));
-      updateActiveProfile();
+      updateActiveUser();
       await loadLeaderboard();
     }
   } catch (e) { /* ignore */ }
