@@ -1,32 +1,58 @@
 import User from "../models/userModel.js"
 
 export const getLeaderboard = async (req, res) => {
-  const users = await User.find().sort({ score: -1, name: 1 }).select({ name: 1, score: 1, _id: 0 });
+  const users = await User.find().sort({ score: -1, name: 1 }).select({ name: 1, score: 1, _id: 0 }).limit(10);
   return res.status(200).json(users);
 }
 
 
+// export const addUser = async (req, res) => {
+//   try {
+//     const newUser = new User(req.body);
+
+//     const existingUser = await User.find({ name: newUser.name });
+//     console.log(existingUser)
+//     if (existingUser.length > 0) {
+//       return res.status(409).json({ error: "User with this name already exists" });
+//     }
+
+//     await newUser.save();
+
+//     res.status(200).json({ message: "OK" });
+//   } catch (error) {
+//     if (error.name === "ValidationError") {
+//       res.status(400).json({ error: "Bad Request" });
+//     } else {
+//       res.status(500).json({ error: "Internal server error." });
+//     }
+//   }
+// }
+
+// POST create new user
 export const addUser = async (req, res) => {
   try {
-    const newUser = new User(req.body);
+    const { name, password, mal } = req.body;
 
-    const existingUser = await User.find({ name: newUser.name });
-    console.log(existingUser)
-    if (existingUser.length > 0) {
-      return res.status(409).json({ error: "User with this name already exists" });
-    }
+    let user = await User.findOne({ name });
 
-    await newUser.save();
-
-    res.status(200).json({ message: "OK" });
-  } catch (error) {
-    if (error.name === "ValidationError") {
-      res.status(400).json({ error: "Bad Request" });
+    if (!user) {
+      // ถ้าไม่เจอ user -> สร้างใหม่
+      user = new User({
+        name,
+        password,
+        mal: mal && mal.trim() !== "" ? mal : "Naxocist",
+        score: 0,
+      });
+      await user.save();
+      return res.json({ message: "User created", user });
     } else {
-      res.status(500).json({ error: "Internal server error." });
+      // ถ้ามีอยู่แล้ว -> ส่งข้อมูลกลับ
+      return res.json({ message: "User already exists", user });
     }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-}
+};
 
 
 export const updateUserScore = async (req, res) => {

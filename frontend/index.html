@@ -1,78 +1,284 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Weeb Guess — MAL Anime Guess</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <title>Anime Guessing Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: space-between;
+      margin: 20px;
+      background: #f9f9f9;
+    }
+    .container {
+      width: 70%;
+    }
+    .leaderboard {
+      width: 25%;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .hint-box {
+      margin: 20px 0;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+    }
+    ul {
+        list-style-type: decimal;
+    }
+  </style>
 </head>
 <body>
-  <div id="app" class="container">
-    <header>
-      <h1>MAL Weeb Guess</h1>
-      <p class="subtitle">the test that shows how weeb you are..</p>
-    </header>
+  <div class="container">
+    <h2>Anime Guessing Game</h2>
+    <div id="loginForm">
+        <input type="text" id="name" placeholder="Enter your name" required>
+        <input type="text" id="mal" placeholder="MAL Username (optional)">
+        <input type="password" id="password" placeholder="Password" required>
+        <button onclick="login()">Start Game</button>
+        <button onclick="deleteUser()" style="background:#e74c3c; margin-top:10px;">Delete User</button>
+    </div>
 
-    <section class="controls card">
-      <h2>Setup</h2>
-
-      <label>Enter MyAnimeList (MAL) username if you have one: <input id="mal-username" placeholder="e.g. example_user" /></label>
-
-      <div class="or">or</div>
-
-      <label>Enter the list of animes(separated by new lines):</label>
-      <textarea id="user-list" rows="4" placeholder="e.g. Fullmetal Alchemist: Brotherhood"></textarea>
-
-      <details id="picker">
-        <summary>customization</summary>
-        <div class="row">
-          <label>Year from: <input id="year-from" type="number" min="1900" max="2099" value="2000" /></label>
-          <label>Year to: <input id="year-to" type="number" min="1900" max="2099" value="2025" /></label>
-        </div>
-        <p>Select at least 4 genres</p>
-        <div id="genres" class="genres-grid">
-          <!-- genre checkboxes inserted by JS -->
-        </div>
-      </details>
-
-      <div class="row">
-        <button id="start-btn" class="primary">Start Game</button>
-        <button id="reset-btn">Reset</button>
+    <div id="gameArea" style="display:none;">
+      <div class="hint-box" id="hintBox">
+        <p>Loading hint...</p>
       </div>
-    </section>
-
-    <section id="game-area" class="card hidden">
-      <div id="statusbar" class="row between">
-        <div>Round <span id="current-index">1</span>/<span id="total-count">1</span></div>
-        <div>Current Score: <span id="score">0</span></div>
-      </div>
-
-      <div id="hint-area" class="hints">
-        <!-- Hints will be rendered here -->
-      </div>
-
-      <div id="guess-area">
-        <input id="guess-input" placeholder="Type the anime name you think it is..." />
-        <button id="guess-btn">Guess</button>
-        <button id="next-btn" class="secondary hidden">Skip to next</button>
-      </div>
-
-      <div id="progress-log" class="log"></div>
-    </section>
-
-    <section id="result-area" class="card hidden">
-      <h2>Results & Tier</h2>
-      <div id="result-summary"></div>
-      <div id="meme-area" class="meme"></div>
-      <button id="play-again" class="primary">Play Again</button>
-    </section>
-
-    <footer class="muted">
-      Built with MyAnimeList API and Typhoon free API — customizable as you wish
-    </footer>
+      <input type="text" id="guess" placeholder="Your guess here">
+      <button onclick="submitGuess()">Guess</button>
+      <button onclick="skip()">Skip</button>
+    </div>
   </div>
 
-  <script src="index.js" defer></script>
+  <div class="leaderboard">
+    <h2>Leaderboard</h2>
+    <ul id="leaderboardList"></ul>
+    <p id="myRank"></p>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let currentHintIndex = 1;
+    let currentAnswer = null;
+    let allHints = null;
+  
+    async function login() {
+      const name = document.getElementById("name").value;
+      const mal = document.getElementById("mal").value || "Naxocist";
+      const password = document.getElementById("password").value;
+  
+      if (!name || !password) {
+        alert("Please enter both name and password.");
+        return;
+      }
+  
+      const res = await fetch("http://localhost:3221/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name:name, mal:mal, password:password })
+      });
+  
+      const data = await res.json();
+      currentUser = data.user;
+  
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("gameArea").style.display = "block";
+  
+      loadLeaderboard();
+      loadHint();
+    }
+  
+    async function deleteUser() {
+      const name = document.getElementById("name").value;
+      const password = document.getElementById("password").value;
+  
+      if (!name || !password) {
+        alert("Please enter both name and password to delete user.");
+        return;
+      }
+  
+      if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+  
+      const res = await fetch("http://localhost:3221/api/users", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, password })
+      });
+  
+      const data = await res.json();
+  
+      if (res.ok) {
+        alert(`User "${name}" deleted successfully.`);
+        document.getElementById("name").value = "";
+        document.getElementById("mal").value = "";
+        document.getElementById("password").value = "";
+      } else {
+        alert("Error: " + data.error);
+      }
+    }
+  
+    async function loadLeaderboard() {
+      const res = await fetch("http://localhost:3221/api/users");
+      const users = await res.json();
+  
+      const list = document.getElementById("leaderboardList");
+      list.innerHTML = "";
+      users.slice(0, 5).forEach(u => {
+        const li = document.createElement("li");
+        li.textContent = `${u.name} - ${u.score}`;
+        list.appendChild(li);
+      });
+  
+      // หาว่าเราอยู่อันดับที่เท่าไหร่
+      const rank = users.findIndex(u => u.name === currentUser.name) + 1;
+      if (rank > 0) {
+        document.getElementById("myRank").textContent =
+          `You are ranked #${rank} (${currentUser.name}) - Score: ${currentUser.score}`;
+      }
+    }
+  
+    async function loadHint() {
+      const res = await fetch(`http://localhost:3221/api/mal/${currentUser.mal}`);
+      const hintData = await res.json();
+  
+      allHints = hintData;
+      currentAnswer = hintData.answer;
+      currentHintIndex = 1;
+  
+      showHint();
+    }
+  
+    function showHint() {
+  const hintBox = document.getElementById("hintBox");
+  const hint = allHints[currentHintIndex];
+  if (!hint) {
+    hintBox.innerHTML = "<p>No more hints. Skipping...</p>";
+    return;
+  }
+
+  let html = "";
+
+  // studios
+  if (hint.studios) {
+    html += `<p><b>Studios:</b> ${hint.studios.join(", ")}</p>`;
+  }
+
+  // status
+  if (hint.status) {
+    html += `<p><b>Status:</b> ${hint.status}</p>`;
+  }
+
+  // mean score, eps, rating
+  if (hint.mean) {
+    html += `<p><b>Mean score:</b> ${hint.mean}</p>`;
+  }
+  if (hint.num_eps) {
+    html += `<p><b>Episodes:</b> ${hint.num_eps}</p>`;
+  }
+  if (hint.rating) {
+    html += `<p><b>Rating:</b> ${hint.rating}</p>`;
+  }
+
+  // popularity, genres
+  if (hint.popularity) {
+    html += `<p><b>Popularity:</b> ${hint.popularity}</p>`;
+  }
+  if (hint.genres) {
+    html += `<p><b>Genres:</b> ${hint.genres.join(", ")}</p>`;
+  }
+
+  // dates + season
+  if (hint.startdate) {
+    html += `<p><b>Start Date:</b> ${hint.startdate}</p>`;
+  }
+  if (hint.enddate) {
+    html += `<p><b>End Date:</b> ${hint.enddate}</p>`;
+  }
+  if (hint.season) {
+    html += `<p><b>Season:</b> ${hint.season}</p>`;
+  }
+
+  // synopsis
+  if (hint.synopsis) {
+    html += `<p><b>Synopsis:</b> ${hint.synopsis}</p>`;
+  }
+
+  // main picture
+  if (hint.main_picture) {
+    html += `<img src="${hint.main_picture.medium}" alt="Anime Image" style="max-width:200px; border-radius:8px; margin:10px 0;">`;
+  }
+
+  // pictures (เพิ่มเป็น gallery เล็ก ๆ)
+  if (hint.pictures) {
+    html += `<div style="display:flex; gap:10px; flex-wrap:wrap;">`;
+    hint.pictures.forEach(pic => {
+      html += `<img src="${pic.medium}" style="max-width:100px; border-radius:6px;">`;
+    });
+    html += `</div>`;
+  }
+
+  // fallback ถ้าไม่เข้า case ไหนเลย
+  if (html === "") {
+    html = `<pre>${JSON.stringify(hint, null, 2)}</pre>`;
+  }
+
+  hintBox.innerHTML = html;
+}
+
+  
+    async function submitGuess() {
+      const guess = document.getElementById("guess").value.trim();
+  
+      if (guess === currentAnswer.toString()) {
+        const name = document.getElementById("name").value;
+        const password = document.getElementById("password").value;
+        alert("Correct!");
+        // คิดคะแนน: hint น้อยได้คะแนนเยอะ
+        let scoreEarned = Math.max(10 - currentHintIndex * 2, 1);
+  
+        await fetch(`http://localhost:3221/api/users`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: name, score: scoreEarned, password: password})
+        });
+  
+        currentUser.score += scoreEarned;
+        loadLeaderboard();
+        loadHint(); // โหลดคำถามใหม่
+      } else {
+        alert("Wrong answer! Try next hint.");
+        skip();
+      }
+    }
+  
+    function skip() {
+      currentHintIndex++;
+      showHint();
+    }
+  </script>
+  
 </body>
 </html>
-
