@@ -41,7 +41,7 @@ export async function getSynopsisSummarization(data) {
       throw new Error("No AI! (remove USE_AI env var to enable)");
     }
 
-    const typhoon = true;
+    const typhoon = false;
 
     const base_url = typhoon ? "https://api.opentyphoon.ai/v1/chat/completions" : "https://api.groq.com/openai/v1/chat/completions";
     const api_key = typhoon ? process.env.TYPHOON_API_KEY : process.env.GROQ_API_KEY;

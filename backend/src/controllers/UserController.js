@@ -14,15 +14,15 @@ export const addUser = async (req, res) => {
       return res.status(200).json({ message: "User already exists", user });
     }
 
-    const newUser = new User({
+    user = new User({
       name,
       password,
       mal: mal?.trim() ? mal : "Naxocist",
       score: 0,
     });
 
-    await newUser.save();
-    return res.status(201).json({ message: "User created", user: newUser });
+    await user.save();
+    return res.status(201).json({ message: "User created", user });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -34,6 +34,7 @@ export const updateUserScore = async (req, res) => {
   try {
     const { name, score, password } = req.body;
 
+    console.log(`Received score update request: name=${name}, score=${score}, password=${password}`);
     if (!name || !password || !score) {
       return res.status(400).json({ error: "Bad Request" });
     }
@@ -49,6 +50,7 @@ export const updateUserScore = async (req, res) => {
     }
 
     if (score > user.score) {
+      console.log(`Updating score for ${name}: ${user.score} -> ${score}`);
       user.score = score;
       await user.save();
     }
