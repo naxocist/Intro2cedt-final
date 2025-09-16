@@ -314,6 +314,7 @@ function endRound(win) {
   }
 
   submitScore();
+  els.gameArea.classList.add('hidden');
 }
 
 async function submitScore() {
