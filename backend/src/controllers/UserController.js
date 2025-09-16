@@ -5,57 +5,24 @@ export const getLeaderboard = async (req, res) => {
   return res.status(200).json(users);
 }
 
-
-// export const addUser = async (req, res) => {
-//   try {
-//     const newUser = new User(req.body);
-
-//     const existingUser = await User.find({ name: newUser.name });
-//     console.log(existingUser)
-//     if (existingUser.length > 0) {
-//       return res.status(409).json({ error: "User with this name already exists" });
-//     }
-
-//     await newUser.save();
-
-//     res.status(200).json({ message: "OK" });
-//   } catch (error) {
-//     if (error.name === "ValidationError") {
-//       res.status(400).json({ error: "Bad Request" });
-//     } else {
-//       res.status(500).json({ error: "Internal server error." });
-//     }
-//   }
-// }
-
-// POST create new user
 export const addUser = async (req, res) => {
   try {
     const { name, password, mal } = req.body;
-
-<<<<<<< HEAD
     let user = await User.findOne({ name });
-=======
-    const existingUser = await User.find({ name: newUser.name });
-    if (existingUser.length > 0) {
-      return res.status(409).json({ error: "User with this name already exists" });
-    }
->>>>>>> e279e7decbff03e1f39a34e079c049d553c5d2fc
 
     if (!user) {
-      // ถ้าไม่เจอ user -> สร้างใหม่
       user = new User({
         name,
         password,
-        mal: mal && mal.trim() !== "" ? mal : "Naxocist",
+        mal: mal?.trim() ? mal : "Naxocist",
         score: 0,
       });
+
       await user.save();
-      return res.json({ message: "User created", user });
-    } else {
-      // ถ้ามีอยู่แล้ว -> ส่งข้อมูลกลับ
-      return res.json({ message: "User already exists", user });
+      return res.stats(201).json({ message: "User created", user });
     }
+
+    return res.status(200).json({ message: "User already exists", user });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

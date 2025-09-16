@@ -1,66 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Anime Guessing Game</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: space-between;
-      margin: 20px;
-      background: #f9f9f9;
-    }
-    .container {
-      width: 70%;
-    }
-    .leaderboard {
-      width: 25%;
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
-    }
-    h2 {
-      margin-top: 0;
-    }
-    input, button {
-      padding: 8px;
-      margin: 5px 0;
-      width: 100%;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #45a049;
-    }
-    .hint-box {
-      margin: 20px 0;
-      padding: 15px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
-    }
-    ul {
-        list-style-type: decimal;
-    }
-  </style>
+  <link rel="stylesheet" href="./styles.css">
 </head>
+
 <body>
   <div class="container">
     <h2>Anime Guessing Game</h2>
     <div id="loginForm">
-        <input type="text" id="name" placeholder="Enter your name" required>
-        <input type="text" id="mal" placeholder="MAL Username (optional)">
-        <input type="password" id="password" placeholder="Password" required>
-        <button onclick="login()">Start Game</button>
-        <button onclick="deleteUser()" style="background:#e74c3c; margin-top:10px;">Delete User</button>
+      <input type="text" id="name" placeholder="Enter your name" required>
+      <input type="text" id="mal" placeholder="MAL Username (optional)">
+      <input type="password" id="password" placeholder="Password" required>
+      <button onclick="login()">Start Game</button>
+      <button onclick="deleteUser()" style="background:#e74c3c; margin-top:10px;">Delete User</button>
     </div>
 
     <div id="gameArea" style="display:none;">
@@ -84,52 +39,52 @@
     let currentHintIndex = 1;
     let currentAnswer = null;
     let allHints = null;
-  
+
     async function login() {
       const name = document.getElementById("name").value;
       const mal = document.getElementById("mal").value || "Naxocist";
       const password = document.getElementById("password").value;
-  
+
       if (!name || !password) {
         alert("Please enter both name and password.");
         return;
       }
-  
+
       const res = await fetch("http://localhost:3221/api/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name:name, mal:mal, password:password })
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({name: name, mal: mal, password: password})
       });
-  
+
       const data = await res.json();
       currentUser = data.user;
-  
+
       document.getElementById("loginForm").style.display = "none";
       document.getElementById("gameArea").style.display = "block";
-  
+
       loadLeaderboard();
       loadHint();
     }
-  
+
     async function deleteUser() {
       const name = document.getElementById("name").value;
       const password = document.getElementById("password").value;
-  
+
       if (!name || !password) {
         alert("Please enter both name and password to delete user.");
         return;
       }
-  
+
       if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
-  
+
       const res = await fetch("http://localhost:3221/api/users", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, password })
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({name, password})
       });
-  
+
       const data = await res.json();
-  
+
       if (res.ok) {
         alert(`User "${name}" deleted successfully.`);
         document.getElementById("name").value = "";
@@ -139,11 +94,11 @@
         alert("Error: " + data.error);
       }
     }
-  
+
     async function loadLeaderboard() {
       const res = await fetch("http://localhost:3221/api/users");
       const users = await res.json();
-  
+
       const list = document.getElementById("leaderboardList");
       list.innerHTML = "";
       users.slice(0, 5).forEach(u => {
@@ -151,7 +106,7 @@
         li.textContent = `${u.name} - ${u.score}`;
         list.appendChild(li);
       });
-  
+
       // หาว่าเราอยู่อันดับที่เท่าไหร่
       const rank = users.findIndex(u => u.name === currentUser.name) + 1;
       if (rank > 0) {
@@ -159,112 +114,112 @@
           `You are ranked #${rank} (${currentUser.name}) - Score: ${currentUser.score}`;
       }
     }
-  
+
     async function loadHint() {
       const res = await fetch(`http://localhost:3221/api/mal/${currentUser.mal}`);
       const hintData = await res.json();
-  
+
       allHints = hintData;
       currentAnswer = hintData.answer;
       currentHintIndex = 1;
-  
+
       showHint();
     }
-  
+
     function showHint() {
-  const hintBox = document.getElementById("hintBox");
-  const hint = allHints[currentHintIndex];
-  if (!hint) {
-    hintBox.innerHTML = "<p>No more hints. Skipping...</p>";
-    return;
-  }
+      const hintBox = document.getElementById("hintBox");
+      const hint = allHints[currentHintIndex];
+      if (!hint) {
+        hintBox.innerHTML = "<p>No more hints. Skipping...</p>";
+        return;
+      }
 
-  let html = "";
+      let html = "";
 
-  // studios
-  if (hint.studios) {
-    html += `<p><b>Studios:</b> ${hint.studios.join(", ")}</p>`;
-  }
+      // studios
+      if (hint.studios) {
+        html += `<p><b>Studios:</b> ${hint.studios.join(", ")}</p>`;
+      }
 
-  // status
-  if (hint.status) {
-    html += `<p><b>Status:</b> ${hint.status}</p>`;
-  }
+      // status
+      if (hint.status) {
+        html += `<p><b>Status:</b> ${hint.status}</p>`;
+      }
 
-  // mean score, eps, rating
-  if (hint.mean) {
-    html += `<p><b>Mean score:</b> ${hint.mean}</p>`;
-  }
-  if (hint.num_eps) {
-    html += `<p><b>Episodes:</b> ${hint.num_eps}</p>`;
-  }
-  if (hint.rating) {
-    html += `<p><b>Rating:</b> ${hint.rating}</p>`;
-  }
+      // mean score, eps, rating
+      if (hint.mean) {
+        html += `<p><b>Mean score:</b> ${hint.mean}</p>`;
+      }
+      if (hint.num_eps) {
+        html += `<p><b>Episodes:</b> ${hint.num_eps}</p>`;
+      }
+      if (hint.rating) {
+        html += `<p><b>Rating:</b> ${hint.rating}</p>`;
+      }
 
-  // popularity, genres
-  if (hint.popularity) {
-    html += `<p><b>Popularity:</b> ${hint.popularity}</p>`;
-  }
-  if (hint.genres) {
-    html += `<p><b>Genres:</b> ${hint.genres.join(", ")}</p>`;
-  }
+      // popularity, genres
+      if (hint.popularity) {
+        html += `<p><b>Popularity:</b> ${hint.popularity}</p>`;
+      }
+      if (hint.genres) {
+        html += `<p><b>Genres:</b> ${hint.genres.join(", ")}</p>`;
+      }
 
-  // dates + season
-  if (hint.startdate) {
-    html += `<p><b>Start Date:</b> ${hint.startdate}</p>`;
-  }
-  if (hint.enddate) {
-    html += `<p><b>End Date:</b> ${hint.enddate}</p>`;
-  }
-  if (hint.season) {
-    html += `<p><b>Season:</b> ${hint.season}</p>`;
-  }
+      // dates + season
+      if (hint.startdate) {
+        html += `<p><b>Start Date:</b> ${hint.startdate}</p>`;
+      }
+      if (hint.enddate) {
+        html += `<p><b>End Date:</b> ${hint.enddate}</p>`;
+      }
+      if (hint.season) {
+        html += `<p><b>Season:</b> ${hint.season}</p>`;
+      }
 
-  // synopsis
-  if (hint.synopsis) {
-    html += `<p><b>Synopsis:</b> ${hint.synopsis}</p>`;
-  }
+      // synopsis
+      if (hint.synopsis) {
+        html += `<p><b>Synopsis:</b> ${hint.synopsis}</p>`;
+      }
 
-  // main picture
-  if (hint.main_picture) {
-    html += `<img src="${hint.main_picture.medium}" alt="Anime Image" style="max-width:200px; border-radius:8px; margin:10px 0;">`;
-  }
+      // main picture
+      if (hint.main_picture) {
+        html += `<img src="${hint.main_picture.medium}" alt="Anime Image" style="max-width:200px; border-radius:8px; margin:10px 0;">`;
+      }
 
-  // pictures (เพิ่มเป็น gallery เล็ก ๆ)
-  if (hint.pictures) {
-    html += `<div style="display:flex; gap:10px; flex-wrap:wrap;">`;
-    hint.pictures.forEach(pic => {
-      html += `<img src="${pic.medium}" style="max-width:100px; border-radius:6px;">`;
-    });
-    html += `</div>`;
-  }
+      // pictures (เพิ่มเป็น gallery เล็ก ๆ)
+      if (hint.pictures) {
+        html += `<div style="display:flex; gap:10px; flex-wrap:wrap;">`;
+        hint.pictures.forEach(pic => {
+          html += `<img src="${pic.medium}" style="max-width:100px; border-radius:6px;">`;
+        });
+        html += `</div>`;
+      }
 
-  // fallback ถ้าไม่เข้า case ไหนเลย
-  if (html === "") {
-    html = `<pre>${JSON.stringify(hint, null, 2)}</pre>`;
-  }
+      // fallback ถ้าไม่เข้า case ไหนเลย
+      if (html === "") {
+        html = `<pre>${JSON.stringify(hint, null, 2)}</pre>`;
+      }
 
-  hintBox.innerHTML = html;
-}
+      hintBox.innerHTML = html;
+    }
 
-  
+
     async function submitGuess() {
       const guess = document.getElementById("guess").value.trim();
-  
+
       if (guess === currentAnswer.toString()) {
         const name = document.getElementById("name").value;
         const password = document.getElementById("password").value;
         alert("Correct!");
         // คิดคะแนน: hint น้อยได้คะแนนเยอะ
         let scoreEarned = Math.max(10 - currentHintIndex * 2, 1);
-  
+
         await fetch(`http://localhost:3221/api/users`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: name, score: scoreEarned, password: password})
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({name: name, score: scoreEarned, password: password})
         });
-  
+
         currentUser.score += scoreEarned;
         loadLeaderboard();
         loadHint(); // โหลดคำถามใหม่
@@ -273,12 +228,13 @@
         skip();
       }
     }
-  
+
     function skip() {
       currentHintIndex++;
       showHint();
     }
   </script>
-  
+
 </body>
+
 </html>

@@ -64,7 +64,6 @@ export async function getSynopsisSummarization(data) {
     return summary;
 
   } catch (error) {
-
     // fallback to raw synopsis if AI fails
     return data?.synopsis?.slice(0, 200) + "...";
   }
