@@ -39,7 +39,6 @@ export const getRandomAnimeCluesByUsername = async (req, res) => {
     res.status(200).json(clues);
 
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: "Something went wrong" });
   }
 };

@@ -1,5 +1,5 @@
 export async function createCluesByData(data) {
-  const summary = await getSynopsisSummarization(data);
+  const summary = data.synopsis ? await getSynopsisSummarization(data) : "";
 
   const clues = {
     1: {
@@ -33,22 +33,28 @@ export async function createCluesByData(data) {
 
 
 export async function getSynopsisSummarization(data) {
-  const prompt = `Summarize this anime synopsis for anime guessing without using specific names, be precise and informative. Synopsis: ${data?.synopsis}`;
+  const prompt = createPrompt(data.synopsis || "");
 
   try {
 
     if (process.env.USE_AI == "False") {
-      throw new Error("No AI!");
+      throw new Error("No AI! (remove USE_AI env var to enable)");
     }
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const typhoon = true;
+
+    const base_url = typhoon ? "https://api.opentyphoon.ai/v1/chat/completions" : "https://api.groq.com/openai/v1/chat/completions";
+    const api_key = typhoon ? process.env.TYPHOON_API_KEY : process.env.GROQ_API_KEY;
+    const model = typhoon ? "typhoon-v2.1-12b-instruct" : "openai/gpt-oss-120b";
+
+    const response = await fetch(base_url, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        "Authorization": `Bearer ${api_key}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-120b",
+        model: model,
         messages: [{ role: "user", content: prompt }]
       })
     });
@@ -58,11 +64,27 @@ export async function getSynopsisSummarization(data) {
     return summary;
 
   } catch (error) {
-    console.log(error);
 
     // fallback to raw synopsis if AI fails
     return data?.synopsis?.slice(0, 200) + "...";
   }
 }
 
+
+function createPrompt(synopsis) {
+  return `Rewrite the following anime synopsis into a clue-style version for a guessing game. 
+The clue must: Avoid all specific names of characters, places, or groups. 
+Be informative, focusing on key themes, conflicts, and settings. 
+Stay precise and concise (2–4 sentences).
+Keep it engaging enough to help players guess, without making it too obvious.
+
+Now your turn:
+Full synopsis:
+${synopsis}
+Clue-style synopsis:
+
+*Also attach thai translation of that clue-style synopsis at the end of your response separated only by the symbol '|', so the format becomes <clue-style synopsis> | <thai translation>
+*Do not include any escape characters like \n or \ in your response (put everything in a single line)
+`
+}
 

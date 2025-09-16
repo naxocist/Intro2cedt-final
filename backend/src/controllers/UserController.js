@@ -33,7 +33,14 @@ export const addUser = async (req, res) => {
   try {
     const { name, password, mal } = req.body;
 
+<<<<<<< HEAD
     let user = await User.findOne({ name });
+=======
+    const existingUser = await User.find({ name: newUser.name });
+    if (existingUser.length > 0) {
+      return res.status(409).json({ error: "User with this name already exists" });
+    }
+>>>>>>> e279e7decbff03e1f39a34e079c049d553c5d2fc
 
     if (!user) {
       // ถ้าไม่เจอ user -> สร้างใหม่
