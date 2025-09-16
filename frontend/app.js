@@ -315,8 +315,9 @@ async function endRound(win) {
     }
   }
 
-  await submitScore();
   els.gameArea.classList.add("hidden");
+  await submitScore();
+  await updateData();
 }
 
 async function submitScore() {
@@ -335,7 +336,6 @@ async function submitScore() {
       })
     })
 
-    await updateData();
   } catch (e) {
     console.log("Error on submit score", e.message);
   }
