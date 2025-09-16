@@ -1,0 +1,200 @@
+let currentUser = null;
+let currentHintIndex = 1;
+let currentAnswer = null;
+let allHints = null;
+
+async function login() {
+  const name = document.getElementById("name").value;
+  const mal = document.getElementById("mal").value || "Naxocist";
+  const password = document.getElementById("password").value;
+
+  if (!name || !password) {
+    alert("Please enter both name and password.");
+    return;
+  }
+
+  const res = await fetch("http://localhost:3221/api/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: name, mal: mal, password: password })
+  });
+
+  const data = await res.json();
+  currentUser = data.user;
+
+  document.getElementById("loginForm").style.display = "none";
+  document.getElementById("gameArea").style.display = "block";
+
+  loadLeaderboard();
+  loadHint();
+}
+
+async function deleteUser() {
+  const name = document.getElementById("name").value;
+  const password = document.getElementById("password").value;
+
+  if (!name || !password) {
+    alert("Please enter both name and password to delete user.");
+    return;
+  }
+
+  if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+
+  const res = await fetch("http://localhost:3221/api/users", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, password })
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    alert(`User "${name}" deleted successfully.`);
+    document.getElementById("name").value = "";
+    document.getElementById("mal").value = "";
+    document.getElementById("password").value = "";
+  } else {
+    alert("Error: " + data.error);
+  }
+}
+
+async function loadLeaderboard() {
+  const res = await fetch("http://localhost:3221/api/users");
+  const users = await res.json();
+
+  const list = document.getElementById("leaderboardList");
+  list.innerHTML = "";
+  users.slice(0, 5).forEach(u => {
+    const li = document.createElement("li");
+    li.textContent = `${u.name} - ${u.score}`;
+    list.appendChild(li);
+  });
+
+  // หาว่าเราอยู่อันดับที่เท่าไหร่
+  const rank = users.findIndex(u => u.name === currentUser.name) + 1;
+  if (rank > 0) {
+    document.getElementById("myRank").textContent =
+      `You are ranked #${rank} (${currentUser.name}) - Score: ${currentUser.score}`;
+  }
+}
+
+async function loadHint() {
+  const res = await fetch(`http://localhost:3221/api/mal/${currentUser.mal}`);
+  const hintData = await res.json();
+
+  allHints = hintData;
+  currentAnswer = hintData.answer;
+  currentHintIndex = 1;
+
+  showHint();
+}
+
+function showHint() {
+  const hintBox = document.getElementById("hintBox");
+  const hint = allHints[currentHintIndex];
+  if (!hint) {
+    hintBox.innerHTML = "<p>No more hints. Skipping...</p>";
+    return;
+  }
+
+  let html = "";
+
+  // studios
+  if (hint.studios) {
+    html += `<p><b>Studios:</b> ${hint.studios.join(", ")}</p>`;
+  }
+
+  // status
+  if (hint.status) {
+    html += `<p><b>Status:</b> ${hint.status}</p>`;
+  }
+
+  // mean score, eps, rating
+  if (hint.mean) {
+    html += `<p><b>Mean score:</b> ${hint.mean}</p>`;
+  }
+  if (hint.num_eps) {
+    html += `<p><b>Episodes:</b> ${hint.num_eps}</p>`;
+  }
+  if (hint.rating) {
+    html += `<p><b>Rating:</b> ${hint.rating}</p>`;
+  }
+
+  // popularity, genres
+  if (hint.popularity) {
+    html += `<p><b>Popularity:</b> ${hint.popularity}</p>`;
+  }
+  if (hint.genres) {
+    html += `<p><b>Genres:</b> ${hint.genres.join(", ")}</p>`;
+  }
+
+  // dates + season
+  if (hint.startdate) {
+    html += `<p><b>Start Date:</b> ${hint.startdate}</p>`;
+  }
+  if (hint.enddate) {
+    html += `<p><b>End Date:</b> ${hint.enddate}</p>`;
+  }
+  if (hint.season) {
+    html += `<p><b>Season:</b> ${hint.season}</p>`;
+  }
+
+  // synopsis
+  if (hint.synopsis) {
+    html += `<p><b>Synopsis:</b> ${hint.synopsis}</p>`;
+  }
+
+  // main picture
+  if (hint.main_picture) {
+    html += `<img src="${hint.main_picture.medium}" alt="Anime Image" style="max-width:200px; border-radius:8px; margin:10px 0;">`;
+  }
+
+  // pictures (เพิ่มเป็น gallery เล็ก ๆ)
+  if (hint.pictures) {
+    html += `<div style="display:flex; gap:10px; flex-wrap:wrap;">`;
+    hint.pictures.forEach(pic => {
+      html += `<img src="${pic.medium}" style="max-width:100px; border-radius:6px;">`;
+    });
+    html += `</div>`;
+  }
+
+  // fallback ถ้าไม่เข้า case ไหนเลย
+  if (html === "") {
+    html = `< pre > ${JSON.stringify(hint, null, 2)}</pre > `;
+  }
+
+  hintBox.innerHTML = html;
+}
+
+
+async function submitGuess() {
+  const guess = document.getElementById("guess").value.trim();
+
+  if (guess === currentAnswer.toString()) {
+    const name = document.getElementById("name").value;
+    const password = document.getElementById("password").value;
+    alert("Correct!");
+    // คิดคะแนน: hint น้อยได้คะแนนเยอะ
+    let scoreEarned = Math.max(10 - currentHintIndex * 2, 1);
+
+    await fetch(`http://localhost:3221/api/users`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name, score: scoreEarned, password: password })
+    });
+
+    currentUser.score += scoreEarned;
+    loadLeaderboard();
+    loadHint(); // โหลดคำถามใหม่
+  } else {
+    alert("Wrong answer! Try next hint.");
+    skip();
+  }
+}
+
+function skip() {
+  currentHintIndex++;
+  showHint();
+}
+
+
